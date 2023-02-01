@@ -127,7 +127,7 @@ public class SearchClient
     throws IOException
     {
         // IO.debugServerMessages = true;
-        IO.logLevel = LogLevel.Debug;
+        // IO.logLevel = LogLevel.Debug;
 
         State initialState = IO.initializeServerCommunication("Group 5", SearchClient::parseLevel);
         Frontier frontier = getFrontier(args, initialState);

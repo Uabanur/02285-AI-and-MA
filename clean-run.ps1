@@ -1,12 +1,39 @@
-pushd searchclient
 
-echo "Removing old class files"
-rm searchclient/*.class
+$SearchStratgy = "-dfs"
+$ShowGUI = $false;
 
-echo "Compiling class files"
-javac searchclient/*.java
+$Levels = @(
+      'MAPF00'
+    , 'MAPF01'
+    # , 'MAPF02'
+    # , 'MAPF02C'
+    # , 'MAPF03'
+    # , 'MAPF03C'
+    # , 'MAPFslidingpuzzle'
+    # , 'MAPFreorder2'
+    );
 
-echo "Running mavis"
-java -jar mavis.jar -l levels/SAD1.lvl -c "java searchclient.SearchClient" -g -s 150 -t 180
+try
+{
+    pushd searchclient
 
-popd
+    echo "Removing old class files"
+    rm searchclient/*.class
+
+    echo "Compiling class files"
+    javac searchclient/*.java
+
+    echo "Running mavis"
+    foreach($level in $Levels){
+        echo "`n`n`t## Level: $level ##`n"
+        if ($ShowGUI){
+            java -jar mavis.jar -l "levels/$level.lvl" -c "java searchclient.SearchClient $SearchStratgy" -g
+        } else {
+            java -jar mavis.jar -l "levels/$level.lvl" -c "java searchclient.SearchClient $SearchStratgy"
+        }
+    }
+}
+finally
+{
+    popd
+}

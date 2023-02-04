@@ -1,5 +1,5 @@
 
-$SearchStratgy = "-dfs"
+$SearchStrategy = "-dfs"
 $ShowGUI = $false;
 
 $Levels = @(
@@ -27,9 +27,9 @@ try
     foreach($level in $Levels){
         echo "`n`n`t## Level: $level ##`n"
         if ($ShowGUI){
-            java -jar mavis.jar -l "levels/$level.lvl" -c "java searchclient.SearchClient $SearchStratgy" -g
+            java -jar mavis.jar -l "levels/$level.lvl" -c "java searchclient.SearchClient $SearchStrategy" -g
         } else {
-            java -jar mavis.jar -l "levels/$level.lvl" -c "java searchclient.SearchClient $SearchStratgy"
+            java -jar mavis.jar -l "levels/$level.lvl" -c "java searchclient.SearchClient $SearchStrategy"
         }
     }
 }

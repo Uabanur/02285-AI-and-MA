@@ -2,11 +2,8 @@ package searchclient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Locale;
 
 public class SearchClient
@@ -115,48 +112,61 @@ public class SearchClient
 
         // End
         // line is currently "#end"
+        assert line.equals("#end");
 
         return new State(agentRows, agentCols, agentColors, walls, boxes, boxColors, goals);
     }
 
     public static Action[][] search(State initialState, Frontier frontier)
     {
-        System.err.format("Starting %s.\n", frontier.getName());
-
+        IO.info("Starting %s.\n", frontier.getName());
         return GraphSearch.search(initialState, frontier);
     }
 
     public static void main(String[] args)
     throws IOException
     {
-        // Use stderr to print to the console.
-        System.err.println("SearchClient initializing. I am sending this using the error output stream.");
+        // IO.debugServerMessages = true;
+        IO.logLevel = LogLevel.Debug;
 
-        // Send client name to server.
-        System.out.println("SearchClient");
+        State initialState = IO.initializeServerCommunication("Group 5", SearchClient::parseLevel);
+        Frontier frontier = getFrontier(args, initialState);
+        Action[][] plan = findPlan(initialState, frontier);
 
-        // We can also print comments to stdout by prefixing with a #.
-        System.out.println("#This is a comment.");
+        if (plan != null){
+            sendPlanToServer(plan);
+            return;
+        }
 
-        // Parse the level.
-        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
-        State initialState = SearchClient.parseLevel(serverMessages);
+        IO.info("Unable to solve level.");
+    }
 
-        // Select search strategy.
-        Frontier frontier;
+    private static void sendPlanToServer(Action[][] plan) throws IOException {
+        IO.info("Found solution of length %,d.\n", plan.length);
+        IO.sendPlanToServer(plan);
+    }
+
+    private static Action[][] findPlan(State initialState, Frontier frontier) {
+        try
+        {
+            return SearchClient.search(initialState, frontier);
+        }
+        catch (OutOfMemoryError ex)
+        {
+            IO.error("Maximum memory usage exceeded.");
+            return null;
+        }
+    }
+
+    private static Frontier getFrontier(String[] args, State initialState) {
         if (args.length > 0)
         {
             switch (args[0].toLowerCase(Locale.ROOT))
             {
-                case "-bfs":
-                    frontier = new FrontierBFS();
-                    break;
-                case "-dfs":
-                    frontier = new FrontierDFS();
-                    break;
-                case "-astar":
-                    frontier = new FrontierBestFirst(new HeuristicAStar(initialState));
-                    break;
+                case "-bfs":    return new FrontierBFS();
+                case "-dfs":    return new FrontierDFS();
+                case "-greedy": return new FrontierBestFirst(new HeuristicGreedy(initialState));
+                case "-astar":  return new FrontierBestFirst(new HeuristicAStar(initialState));
                 case "-wastar":
                     int w = 5;
                     if (args.length > 1)
@@ -167,61 +177,21 @@ public class SearchClient
                         }
                         catch (NumberFormatException e)
                         {
-                            System.err.println("Couldn't parse weight argument to -wastar as integer, using default.");
+                            IO.warn("Couldn't parse weight argument to -wastar as integer, using default.");
                         }
                     }
-                    frontier = new FrontierBestFirst(new HeuristicWeightedAStar(initialState, w));
-                    break;
-                case "-greedy":
-                    frontier = new FrontierBestFirst(new HeuristicGreedy(initialState));
-                    break;
+                    return new FrontierBestFirst(new HeuristicWeightedAStar(initialState, w));
+
                 default:
-                    frontier = new FrontierBFS();
-                    System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or " +
+                    IO.info("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or " +
                                        "-greedy to set the search strategy.");
+                    return new FrontierBFS();
             }
         }
-        else
-        {
-            frontier = new FrontierBFS();
-            System.err.println("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to " +
-                               "set the search strategy.");
-        }
 
-        // Search for a plan.
-        Action[][] plan;
-        try
-        {
-            plan = SearchClient.search(initialState, frontier);
-        }
-        catch (OutOfMemoryError ex)
-        {
-            System.err.println("Maximum memory usage exceeded.");
-            plan = null;
-        }
+        IO.info("Defaulting to BFS search. Use arguments -bfs, -dfs, -astar, -wastar, or -greedy to " +
+                            "set the search strategy.");
 
-        // Print plan to server.
-        if (plan == null)
-        {
-            System.err.println("Unable to solve level.");
-            System.exit(0);
-        }
-        else
-        {
-            System.err.format("Found solution of length %,d.\n", plan.length);
-
-            for (Action[] jointAction : plan)
-            {
-                System.out.print(jointAction[0].name);
-                for (int action = 1; action < jointAction.length; ++action)
-                {
-                    System.out.print("|");
-                    System.out.print(jointAction[action].name);
-                }
-                System.out.println();
-                // We must read the server's response to not fill up the stdin buffer and block the server.
-                serverMessages.readLine();
-            }
-        }
+        return new FrontierBFS();
     }
 }

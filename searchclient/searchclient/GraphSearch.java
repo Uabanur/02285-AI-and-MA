@@ -1,7 +1,5 @@
 package searchclient;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 
 public class GraphSearch {
@@ -60,7 +58,7 @@ public class GraphSearch {
     {
         String statusTemplate = "#Expanded: %,8d, #Frontier: %,8d, #Generated: %,8d, Time: %3.3f s\n%s\n";
         double elapsedTime = (System.nanoTime() - startTime) / 1_000_000_000d;
-        System.err.format(statusTemplate, expanded.size(), frontier.size(), expanded.size() + frontier.size(),
+        IO.debug(statusTemplate, expanded.size(), frontier.size(), expanded.size() + frontier.size(),
                           elapsedTime, Memory.stringRep());
     }
 }

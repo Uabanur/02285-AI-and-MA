@@ -6,7 +6,7 @@ public class GraphSearch {
 
     public static Action[][] search(State initialState, Frontier frontier)
     {
-        boolean outputFixedSolution = true;
+        boolean outputFixedSolution = false;
 
         if (outputFixedSolution) {
             //Part 1:
@@ -44,21 +44,38 @@ public class GraphSearch {
 
                 //Print a status message every 10000 iteration
                 if (++iterations % 10000 == 0) {
-                    printSearchStatus(expanded, frontier);
+                    IO.debug(getSearchStatus(expanded, frontier));
                 }
 
                 //Your code here... Don't forget to print out the stats when a solution has been found (see above)
+                if(frontier.isEmpty()){
+                    IO.info(getSearchStatus(expanded, frontier));
+                    return null;
+                }
+
+                State state = frontier.pop();
+                if(state.isGoalState()){
+                    IO.info(getSearchStatus(expanded, frontier));
+                    return state.extractPlan();
+                }
+
+                expanded.add(state);
+                for (State child : state.getExpandedStates()) {
+                    if (!frontier.contains(child) && !expanded.contains(child)){
+                        frontier.add(child);
+                    }
+                }
             }
         }
     }
 
     private static long startTime = System.nanoTime();
 
-    private static void printSearchStatus(HashSet<State> expanded, Frontier frontier)
+    private static String getSearchStatus(HashSet<State> expanded, Frontier frontier)
     {
         String statusTemplate = "#Expanded: %,8d, #Frontier: %,8d, #Generated: %,8d, Time: %3.3f s\n%s\n";
         double elapsedTime = (System.nanoTime() - startTime) / 1_000_000_000d;
-        IO.debug(statusTemplate, expanded.size(), frontier.size(), expanded.size() + frontier.size(),
+        return String.format(statusTemplate, expanded.size(), frontier.size(), expanded.size() + frontier.size(),
                           elapsedTime, Memory.stringRep());
     }
 }

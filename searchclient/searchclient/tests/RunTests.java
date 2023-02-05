@@ -3,9 +3,13 @@ package searchclient.tests;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
+import searchclient.IO;
+import searchclient.LogLevel;
+
 public class RunTests {
     public static void main(String[] args)
     {
+        IO.logLevel = LogLevel.Debug;
         var tests = new Test[]{
             new ManhattenDistanceTest(),
             new AgentSmallestManhattenDistanceHeuristicTest(),

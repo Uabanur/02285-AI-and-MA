@@ -19,8 +19,7 @@ public class IO {
     public final static String UserDir = System.getProperty("user.dir");
     public final static String LogDir = String.join(File.separator, UserDir, "logs");
     public final static String SearchClientDir = String.join(File.separator, UserDir, "searchclient");
-    public final static String LevelDir = String.join(File.separator, UserDir, "levels");
-    public final static String TestDir = String.join(File.separator, SearchClientDir, "tests");
+    public final static String LevelDir = String.join(File.separator, SearchClientDir, "levels");
 
     public static LogLevel logLevel = LogLevel.Information;
     static boolean debugServerMessages = false;

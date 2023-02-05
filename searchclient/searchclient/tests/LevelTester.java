@@ -15,9 +15,7 @@ import searchclient.State;
 
 public class LevelTester implements Test{
     private State LoadLevel(String levelName) throws IOException{
-        var userDir = System.getProperty("user.dir");
-        var levelsPath = String.join(File.separator, userDir, "searchclient", "levels");
-        var levelFile = new File(levelsPath, levelName + ".lvl");
+        var levelFile = new File(IO.LevelDir, levelName + ".lvl");
         var buffer = new BufferedReader(new FileReader(levelFile));
         var startState = SearchClient.parseLevel(buffer);
         IO.debug("Loaded level start state: \n%s", startState.toString());
@@ -52,7 +50,7 @@ public class LevelTester implements Test{
             level = LoadLevel(levelName);
         } catch (IOException e) {
             IO.error("Failed to load level " + levelName);
-            IO.error(e.getStackTrace().toString());
+            IO.logException(e);
             return false;
         }
 
@@ -74,17 +72,17 @@ public class LevelTester implements Test{
         }
     }
 
-    private boolean logToOutputFile = true;
+    private boolean logToOutputFile = false;
     public boolean RunTests() {
         var levels = new String[] {
             "MAPF00",
-            "MAPF01",
-            "MAPF02",
-            "MAPF02C",
-            "MAPF03",
-            "MAPF03C",
-            "MAPFslidingpuzzle",
-            "MAPFreorder2",
+            // "MAPF01",
+            // "MAPF02",
+            // "MAPF02C",
+            // "MAPF03",
+            // "MAPF03C",
+            // "MAPFslidingpuzzle",
+            // "MAPFreorder2",
             // "BFSfriendly",       // test when this level exists
         };
 

@@ -13,15 +13,6 @@ import searchclient.IO;
 import searchclient.SearchClient;
 import searchclient.State;
 
-class LevelSolveTuple {
-    String levelName;
-    Frontier frontier;
-    public LevelSolveTuple(String levelName, Frontier frontier) {
-        this.levelName = levelName;
-        this.frontier = frontier;
-    }
-}
-
 public class LevelTester implements Test{
     private State LoadLevel(String levelName) throws IOException{
         var userDir = System.getProperty("user.dir");

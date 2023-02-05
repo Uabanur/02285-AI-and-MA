@@ -118,19 +118,19 @@ public class IO {
             writer = new BufferedWriter(new FileWriter(logFile));
 
         } catch (IOException e){
-                IO.error("Failed to log output to file");
-                IO.error(e.getStackTrace().toString());
                 IO.closeLogOutput();
+                IO.error("Failed to log output to file");
+                IO.logException(e);
         }
     }
 
     public static void closeLogOutput() {
+        logOutputToFile = false;
         if (writer == null) return;
         try {
-            logOutputToFile = false;
             writer.close();
         } catch (IOException e) {
-            IO.error(e.getStackTrace().toString());
+            IO.logException(e);
         }
         writer = null;
     }

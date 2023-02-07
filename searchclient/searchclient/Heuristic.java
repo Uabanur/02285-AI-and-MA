@@ -29,19 +29,18 @@ public abstract class Heuristic
     }
 
     public int agentGoalCountHeuristic(State s) {
-        int unfinishedBoxes = 0;
+        int unfinished = 0;
         for (int row = 1; row < State.goals.length - 1; row++) {
             for (int col = 1; col < State.goals[row].length - 1; col++) {
                 char goal = State.goals[row][col];
                 if ('0' <= goal && goal <= '9' && 
                          !(s.agentRows[goal - '0'] == row && s.agentCols[goal - '0'] == col))
                 {
-                    unfinishedBoxes++;
+                    unfinished++;
                 }
             }
         }
-        // IO.debug("State:\n%s\nUnfinished boxes: %d", s, unfinishedBoxes);
-        return unfinishedBoxes;
+        return unfinished;
     }
 
     public int agentSmallestManhattenDistanceHeuristic(State s) {

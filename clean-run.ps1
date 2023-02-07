@@ -3,8 +3,9 @@ $SearchStrategy = "-dfs"
 $ShowGUI = $false;
 
 $Levels = @(
-      'MAPF00'
-    , 'MAPF01'
+    'BFSFriendly'
+    #  'MAPF00'
+    #, 'MAPF01'
     # , 'MAPF02'
     # , 'MAPF02C'
     # , 'MAPF03'

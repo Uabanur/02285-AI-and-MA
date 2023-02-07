@@ -70,6 +70,9 @@ public class GraphSearch {
     }
 
     private static long startTime = System.nanoTime();
+    public static void resetStartTime() {
+        startTime = System.nanoTime();
+    }
 
     private static String getSearchStatus(HashSet<State> expanded, Frontier frontier)
     {

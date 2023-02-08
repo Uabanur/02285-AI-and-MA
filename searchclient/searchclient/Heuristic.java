@@ -33,8 +33,8 @@ public abstract class Heuristic
     {
         // return agentGoalCountHeuristic(s);
         // return agentSmallestManhattenDistanceHeuristic(s);
-        return boxGoalCountHeuristic(s);
-        //return pushPullHeuristic(s);
+        //return boxGoalCountHeuristic(s);
+        return pushPullHeuristic(s);
     }
 
     public int agentGoalCountHeuristic(State s) {
@@ -77,7 +77,7 @@ public abstract class Heuristic
     public int pushPullHeuristic(State s) {
         var totalDistance = 0;
         for (int row = 0; row < s.boxes.length - 1; row++) {
-            for (int col = 0; col < s.boxes[col].length - 1; col++){
+            for (int col = 0; col < s.boxes[row].length - 1; col++){
                 char box = s.boxes[row][col];
                 if (box == 0) continue;
                 Position goal = boxGoals.get(box);

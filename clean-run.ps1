@@ -1,9 +1,11 @@
 
-$SearchStrategy = "-dfs"
+$SearchStrategy = "-greedy"
 $ShowGUI = $false;
 
 $Levels = @(
-    'BFSFriendly'
+    'SAFirefly'
+    , 'SACrunch'
+    # 'BFSFriendly'
     #  'MAPF00'
     #, 'MAPF01'
     # , 'MAPF02'

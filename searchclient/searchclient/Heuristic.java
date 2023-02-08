@@ -1,6 +1,8 @@
 package searchclient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
@@ -9,23 +11,30 @@ public abstract class Heuristic
 {
 
     public ArrayList<AgentPosition> agentGoals = new ArrayList<>();
+    public HashMap<Character,Position> boxGoals = new HashMap<>();
     public Heuristic(State initialState)
     {
         // Here's a chance to pre-process the static parts of the level.
         for (int row = 0; row < State.goals.length; row++) {
             for (int col = 0; col < State.goals[row].length; col++) {
                 var goal = State.goals[row][col];
+                if (goal >= 'A' && goal <= 'Z') {
+                    boxGoals.put(goal, new Position(row, col));
+                }
                 if (goal < '0' || '9' < goal) continue;
                 agentGoals.add(new AgentPosition(goal, row, col));
             }
         }
         IO.debug("Found agent goals: " + agentGoals.toString());
+        IO.debug("Found box goals: "+boxGoals.toString());
     }
 
     public int h(State s)
     {
         // return agentGoalCountHeuristic(s);
-        return agentSmallestManhattenDistanceHeuristic(s);
+        // return agentSmallestManhattenDistanceHeuristic(s);
+        return boxGoalCountHeuristic(s);
+        //return pushPullHeuristic(s);
     }
 
     public int agentGoalCountHeuristic(State s) {
@@ -43,6 +52,16 @@ public abstract class Heuristic
         return unfinished;
     }
 
+    public int boxGoalCountHeuristic(State s) {
+        int unfinished = 0;
+        for (Map.Entry<Character, Position> goal : boxGoals.entrySet()) {
+            char box = goal.getKey();
+            Position goalPos = goal.getValue();
+            if (s.boxes[goalPos.row][goalPos.col] != box) unfinished++;
+        }
+        return unfinished;
+    }
+
     public int agentSmallestManhattenDistanceHeuristic(State s) {
         var totalDistance = 0;
         for (var agent : agentGoals){
@@ -52,6 +71,19 @@ public abstract class Heuristic
             totalDistance += nearestManhattenDistanceAgentGoal(symbol, new Position(row, col));
         }
 
+        return totalDistance;
+    }
+
+    public int pushPullHeuristic(State s) {
+        var totalDistance = 0;
+        for (int row = 0; row < s.boxes.length - 1; row++) {
+            for (int col = 0; col < s.boxes[col].length - 1; col++){
+                char box = s.boxes[row][col];
+                if (box == 0) continue;
+                Position goal = boxGoals.get(box);
+                totalDistance += DistanceCalculator.manhattenDistance(new Position(row,col), goal);
+            }
+        }
         return totalDistance;
     }
 

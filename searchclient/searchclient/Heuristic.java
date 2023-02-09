@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Comparator;
 import java.util.stream.Collectors;
+import java.util.LinkedList;
+import java.util.HashSet;
 
 public abstract class Heuristic
         implements Comparator<State>
@@ -59,6 +61,10 @@ public abstract class Heuristic
             Position goalPos = goal.getValue();
             if (s.boxes[goalPos.row][goalPos.col] != box) unfinished++;
         }
+        //if boxes are in their goals, take agents to theirs
+        if (boxGoals.isEmpty()) {
+            return agentGoalCountHeuristic(s);
+        }
         return unfinished;
     }
 
@@ -81,10 +87,68 @@ public abstract class Heuristic
                 char box = s.boxes[row][col];
                 if (box == 0) continue;
                 Position goal = boxGoals.get(box);
+                //totalDistance += shortestPathDistance(new Position(row,col), goal, s);
                 totalDistance += DistanceCalculator.manhattenDistance(new Position(row,col), goal);
             }
         }
+        //if boxes are in their goals, take agents to theirs
+        if (totalDistance == 0) {
+            return agentSmallestManhattenDistanceHeuristic(s);
+        }
         return totalDistance;
+    }
+
+    public int shortestPathDistance(Position src, Position goal, State s) {
+        HashMap<Position,Integer> distanceTo = new HashMap<>();
+        LinkedList<Position> neighbors = new LinkedList<>();
+        HashSet<Position> visited = new HashSet<>();
+        neighbors.add(src);
+        visited.add(src);
+        distanceTo.put(src,0);
+        while (!neighbors.isEmpty()) {
+            if(neighbors.size() > 10) return 1;
+            Position current = neighbors.remove();
+            if (current == goal) return distanceTo.get(goal);
+            int row = current.row;
+            int col = current.col;
+            Position top = new Position(row-1,col);
+            if (row > 0 && !visited.contains(top)) {
+                visited.add(top);
+                int weight = 1;
+                if (State.walls[top.row][top.col]) weight = 9999;
+                else if (s.boxes[top.row][top.col]!=0) weight = 10;
+                distanceTo.put(top,distanceTo.get(current)+weight);
+                neighbors.add(top);
+            }
+            Position left = new Position(row,col-1);
+            if (col > 0 && !visited.contains(left)) {
+                visited.add(left);
+                int weight = 1;
+                if (State.walls[left.row][left.col]) weight = 9999;
+                else if (s.boxes[left.row][left.col]!=0) weight = 10;
+                distanceTo.put(left,distanceTo.get(current)+weight);
+                neighbors.add(left);
+            }
+            Position bot = new Position(row+1,col);
+            if (row < State.walls.length - 1 && !visited.contains(bot)) {
+                visited.add(bot);
+                int weight = 1;
+                if (State.walls[bot.row][bot.col]) weight = 9999;
+                else if (s.boxes[bot.row][bot.col]!=0) weight = 10;
+                distanceTo.put(bot,distanceTo.get(current)+weight);
+                neighbors.add(bot);
+            }
+            Position right = new Position(row,col+1);
+            if (col < State.walls[row].length - 1 && !visited.contains(right)) {
+                visited.add(right);
+                int weight = 1;
+                if (State.walls[right.row][right.col]) weight = 9999;
+                else if (s.boxes[right.row][right.col]!=0) weight = 10;
+                distanceTo.put(right,distanceTo.get(current)+weight);
+                neighbors.add(right);
+            }
+        }
+        return distanceTo.get(goal);
     }
 
     public int nearestManhattenDistanceAgentGoal(char agentSymbol, Position agentPosition) {

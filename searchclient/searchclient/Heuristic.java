@@ -89,9 +89,10 @@ public abstract class Heuristic
                 Position goal = boxGoals.get(box);
                 Position boxPos = new Position(row,col);
                 Position agent0 = new Position(s.agentRows[0],s.agentCols[0]);
-                //totalDistance += shortestPathDistance(new Position(row,col), goal, s);
-                totalDistance += DistanceCalculator.manhattenDistance(boxPos, goal);
-                totalDistance += DistanceCalculator.manhattenDistance(agent0, boxPos)*0.5;
+                totalDistance += shortestPathDistance(boxPos, goal, s);
+                totalDistance += shortestPathDistance(agent0, boxPos, s)*0.5;
+                //totalDistance += DistanceCalculator.manhattenDistance(boxPos, goal);
+                //totalDistance += DistanceCalculator.manhattenDistance(agent0, boxPos)*0.5;
             }
         }
         //if boxes are in their goals, take agents to theirs
@@ -102,6 +103,8 @@ public abstract class Heuristic
     }
 
     public int shortestPathDistance(Position src, Position goal, State s) {
+        final int WALL_WEIGHT = 9999;
+        final int BOX_WEIGHT = 5;
         HashMap<Position,Integer> distanceTo = new HashMap<>();
         LinkedList<Position> neighbors = new LinkedList<>();
         HashSet<Position> visited = new HashSet<>();
@@ -109,23 +112,17 @@ public abstract class Heuristic
         visited.add(src);
         distanceTo.put(src,0);
         while (!neighbors.isEmpty()) {
-            /*
-            IO.debug("Goal: "+goal.toString());
-            IO.debug("Neighbors: "+neighbors.toString());
-            IO.debug("Visited: "+visited.toString());
-            IO.debug("Distances: "+distanceTo.toString());*/
-            //if(neighbors.size() > 10) return 1;
             Position current = neighbors.remove();
-            if (current == goal) return distanceTo.get(goal);
+            if (current.equals(goal)) return distanceTo.get(goal);
             int row = current.row;
             int col = current.col;
             Position top = new Position(row-1,col);
             if (row > 0 && !visited.contains(top)) {
                 visited.add(top);
                 int weight = 1;
-                if (State.walls[top.row][top.col]) weight = 9999;
+                if (State.walls[top.row][top.col]) weight = WALL_WEIGHT;
                 else {
-                    if (s.boxes[top.row][top.col]!=0) weight = 2;
+                    if (s.boxes[top.row][top.col]!=0) weight = BOX_WEIGHT;
                     neighbors.add(top);
                 }
                 distanceTo.put(top,distanceTo.get(current)+weight);
@@ -134,9 +131,9 @@ public abstract class Heuristic
             if (col > 0 && !visited.contains(left)) {
                 visited.add(left);
                 int weight = 1;
-                if (State.walls[left.row][left.col]) weight = 9999;
+                if (State.walls[left.row][left.col]) weight = WALL_WEIGHT;
                 else {
-                    if (s.boxes[left.row][left.col]!=0) weight = 10;
+                    if (s.boxes[left.row][left.col]!=0) weight = BOX_WEIGHT;
                     neighbors.add(left);
                 }
                 distanceTo.put(left,distanceTo.get(current)+weight);
@@ -145,9 +142,9 @@ public abstract class Heuristic
             if (row < State.walls.length - 1 && !visited.contains(bot)) {
                 visited.add(bot);
                 int weight = 1;
-                if (State.walls[bot.row][bot.col]) weight = 9999;
+                if (State.walls[bot.row][bot.col]) weight = WALL_WEIGHT;
                 else {
-                    if (s.boxes[bot.row][bot.col]!=0) weight = 10;
+                    if (s.boxes[bot.row][bot.col]!=0) weight = BOX_WEIGHT;
                     neighbors.add(bot);
                 }
                 distanceTo.put(bot,distanceTo.get(current)+weight);
@@ -156,9 +153,9 @@ public abstract class Heuristic
             if (col < State.walls[row].length - 1 && !visited.contains(right)) {
                 visited.add(right);
                 int weight = 1;
-                if (State.walls[right.row][right.col]) weight = 9999;
+                if (State.walls[right.row][right.col]) weight = WALL_WEIGHT;
                 else {
-                    if (s.boxes[right.row][right.col]!=0) weight = 10;
+                    if (s.boxes[right.row][right.col]!=0) weight = BOX_WEIGHT;
                     neighbors.add(right);
                 }
                 distanceTo.put(right,distanceTo.get(current)+weight);

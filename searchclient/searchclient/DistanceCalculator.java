@@ -10,9 +10,15 @@ public class DistanceCalculator {
         return Math.abs(from.row - to.row) + Math.abs(from.col - to.col);
     }
 
-    public static int shortestPathDistanceToGoal(Position from, ArrayList<Position> goals, State s) {
+    public static int shortestPathDistance(Position from, Position to, State s) {
+        ArrayList<Position> dest = new ArrayList<>();
+        dest.add(to);
+        return shortestPathDistanceToGoals(from, dest, s);
+    }
+
+    public static int shortestPathDistanceToGoals(Position from, ArrayList<Position> goals, State s) {
         final int WALL_WEIGHT = 9999;
-        final int BOX_WEIGHT = 5;
+        final int BOX_WEIGHT = 5; //could be influenced by map size (to account for time to move box out of blocked place)
         HashMap<Position,Integer> distanceTo = new HashMap<>();
         LinkedList<Position> neighbors = new LinkedList<>();
         HashSet<Position> visited = new HashSet<>();

@@ -1,10 +1,11 @@
 
 $SearchStrategy = "-greedy"
-$ShowGUI = $false;
+$ShowGUI = $true;
 
 $Levels = @(
     'SAFirefly'
     , 'SACrunch'
+    , 'SAsoko3Mix2_08'
     # 'BFSFriendly'
     #  'MAPF00'
     #, 'MAPF01'
@@ -30,7 +31,7 @@ try
     foreach($level in $Levels){
         echo "`n`n`t## Level: $level ##`n"
         if ($ShowGUI){
-            java -jar mavis.jar -l "levels/$level.lvl" -c "java searchclient.SearchClient $SearchStrategy" -g
+            java -jar mavis.jar -l "levels/$level.lvl" -c "java searchclient.SearchClient $SearchStrategy" -g -s 75
         } else {
             java -jar mavis.jar -l "levels/$level.lvl" -c "java searchclient.SearchClient $SearchStrategy"
         }

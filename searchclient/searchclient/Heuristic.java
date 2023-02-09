@@ -86,26 +86,33 @@ public abstract class Heuristic
         return totalDistance;
     }
 
-    public int pushPullHeuristic(State s) {
+    private int totalDistBoxGoals(State s) {
         var totalDistance = 0;
+        ArrayList<Position> boxPositions = new ArrayList<>();
         for (int row = 0; row < s.boxes.length - 1; row++) {
             for (int col = 0; col < s.boxes[row].length - 1; col++){
                 char box = s.boxes[row][col];
                 if (box == 0) continue;
                 ArrayList<Position> goals = boxGoals.get(box);
                 Position boxPos = new Position(row,col);
-                Position agent0 = new Position(s.agentRows[0],s.agentCols[0]);
-                totalDistance += DistanceCalculator.shortestPathDistanceToGoal(boxPos, goals, s);
-                //totalDistance += DistanceCalculator.shortestPathDistance(agent0, boxPos, s)*0.5;
+                boxPositions.add(boxPos);
+                totalDistance += DistanceCalculator.shortestPathDistanceToGoals(boxPos, goals, s);
                 //totalDistance += DistanceCalculator.manhattenDistance(boxPos, goal);
                 //totalDistance += DistanceCalculator.manhattenDistance(agent0, boxPos)*0.5;
             }
         }
+        Position agent0 = new Position(s.agentRows[0],s.agentCols[0]);
+        totalDistance += DistanceCalculator.shortestPathDistanceToGoals(agent0, boxPositions, s);
+        return totalDistance;
+    }
+
+    public int pushPullHeuristic(State s) {
+        int h = totalDistBoxGoals(s);
         //if boxes are in their goals, take agents to theirs
-        if (totalDistance == 0) {
+        if (h == 0) {
             return agentSmallestManhattenDistanceHeuristic(s);
         }
-        return totalDistance;
+        return h;
     }
 
     public int nearestManhattenDistanceAgentGoal(char agentSymbol, Position agentPosition) {

@@ -1,5 +1,6 @@
 package searchclient;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -9,7 +10,7 @@ public class DistanceCalculator {
         return Math.abs(from.row - to.row) + Math.abs(from.col - to.col);
     }
 
-    public static int shortestPathDistance(Position from, Position to, State s) {
+    public static int shortestPathDistanceToGoal(Position from, ArrayList<Position> goals, State s) {
         final int WALL_WEIGHT = 9999;
         final int BOX_WEIGHT = 5;
         HashMap<Position,Integer> distanceTo = new HashMap<>();
@@ -20,7 +21,7 @@ public class DistanceCalculator {
         distanceTo.put(from,0);
         while (!neighbors.isEmpty()) {
             Position current = neighbors.remove();
-            if (current.equals(to)) return distanceTo.get(to);
+            if (goals.contains(current)) return distanceTo.get(current);
             int row = current.row;
             int col = current.col;
             Position top = new Position(row-1,col);

@@ -11,7 +11,7 @@ public abstract class Heuristic
 {
 
     public ArrayList<AgentPosition> agentGoals = new ArrayList<>();
-    public HashMap<Character,Position> boxGoals = new HashMap<>();
+    public HashMap<Character,ArrayList<Position>> boxGoals = new HashMap<>();
     public Heuristic(State initialState)
     {
         // Here's a chance to pre-process the static parts of the level.
@@ -19,7 +19,14 @@ public abstract class Heuristic
             for (int col = 0; col < State.goals[row].length; col++) {
                 var goal = State.goals[row][col];
                 if (goal >= 'A' && goal <= 'Z') {
-                    boxGoals.put(goal, new Position(row, col));
+                    if(!boxGoals.containsKey(goal)) {
+                        ArrayList<Position> positions = new ArrayList<>();
+                        positions.add(new Position(row, col));
+                        boxGoals.put(goal, positions);
+                    }
+                    else {
+                        boxGoals.get(goal).add(new Position(row, col));
+                    }
                 }
                 if (goal < '0' || '9' < goal) continue;
                 agentGoals.add(new AgentPosition(goal, row, col));
@@ -54,10 +61,11 @@ public abstract class Heuristic
 
     public int boxGoalCountHeuristic(State s) {
         int unfinished = 0;
-        for (Map.Entry<Character, Position> goal : boxGoals.entrySet()) {
+        for (Map.Entry<Character, ArrayList<Position>> goal : boxGoals.entrySet()) {
             char box = goal.getKey();
-            Position goalPos = goal.getValue();
-            if (s.boxes[goalPos.row][goalPos.col] != box) unfinished++;
+            for (Position goalPos : goal.getValue()) {
+                if (s.boxes[goalPos.row][goalPos.col] != box) unfinished++;
+            }
         }
         //if boxes are in their goals, take agents to theirs
         if (boxGoals.isEmpty()) {
@@ -84,11 +92,11 @@ public abstract class Heuristic
             for (int col = 0; col < s.boxes[row].length - 1; col++){
                 char box = s.boxes[row][col];
                 if (box == 0) continue;
-                Position goal = boxGoals.get(box);
+                ArrayList<Position> goals = boxGoals.get(box);
                 Position boxPos = new Position(row,col);
                 Position agent0 = new Position(s.agentRows[0],s.agentCols[0]);
-                totalDistance += DistanceCalculator.shortestPathDistance(boxPos, goal, s);
-                totalDistance += DistanceCalculator.shortestPathDistance(agent0, boxPos, s)*0.5;
+                totalDistance += DistanceCalculator.shortestPathDistanceToGoal(boxPos, goals, s);
+                //totalDistance += DistanceCalculator.shortestPathDistance(agent0, boxPos, s)*0.5;
                 //totalDistance += DistanceCalculator.manhattenDistance(boxPos, goal);
                 //totalDistance += DistanceCalculator.manhattenDistance(agent0, boxPos)*0.5;
             }

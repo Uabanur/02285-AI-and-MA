@@ -1,0 +1,138 @@
+Hello, we are group 5.
+We are Roar, Martin and Pere.
+
+<brief explanation of the topics we will address>
+
+################################ 
+
+Exercise 1: (optional)
+    Class diagram over the search client.
+    Give a short overview of the structure of the code.
+    Address major changes (eg. IO wrapper and testing setup)
+
+############################## 
+
+Exercise 2  (Breadth-First Search for Multi-Agent Pathfinding)
+    
+    1a. Solve the level MAPF00.lvl by hand. Test the correctness of your solution by hardcoding it into the search method in graph_search.py.
+    
+Answer: 
+    Show video of handmade solution hardcoded into the `GraphSearch::search` method
+______________________________
+
+    1b. How does your approach to solving the level differ from how Graph-Search would do it?
+
+Answer:
+    We see the whole map, and intuitively guide the agent towards the goal. 
+    Graph search relies on the expanded nodes and frontier to search for the goal.
+    If no heuristic is given, it searches without guidance, either exhaustively (BFS) or "randomly" (DFS).
+______________________________
+
+    2. Implement Graph-Search algorithm. Test your implementation by running the BFS client on the MAPF00.lvl level.
+
+Answer:
+    Show video of BFS solution for the map and explain any differences from the handmade version (if any)
+______________________________
+
+    3. Run your BFS GraphSearch client on the MAPF00.lvl, MAPF01.lvl, MAPF02.lvl, MAPF02C.lvl, MAPF03.lvl, MAPF03C.lvl, MAPFslidingpuzzle.lvl and MAPFreorder2.lvl levels and report your benchmarks.
+
+Note: Explain what is causing the differences observed between the performance of the client on the different levels. Make sure to explain yourselves in a brief but conceptually and technically precise way, using the relevant notions from the course curriculum, e.g. notions such as branching factor, state space size, search tree, etc. Analyse the numbers you get as precisely as possible, e.g. if the number of generated states grows by a factor x whenever a new agent is added to a specific level, why is that?
+
+    Show the benchmarkds for BFS and explain the results. See comments below:
+
+    MAPF0x map size: 11x5 = 55
+           6 internal walls.
+           applicable positions: 55-6 = 49
+    
+    MAPF00 1 agent. 
+        Total states: 49 (48 generated)
+        Time: 0.003 s
+        Time/state: 62.5 microseconds/state
+
+Generated vs total states note: The benchmarks show 48 generated states, that is because it counts expanded.size() + frontier.size(), but when evaluated the goal, the state is removed from the frontier but not yet added to the expanded, so the goal state is not counted in generated. Meaning, BFS has basically explored the entire state space before finding the goal.
+
+    MAPF01 2 agents. 
+        Total states: 49*48 = 2,352 (2350 generated)
+        Time: 0.026 s
+        Time/state: 11.1 microseconds/state
+
+    MAPF02 3 agents. 
+        Total states: 49*48*47 = 110,544 (110,445 generated)
+        Time: 5.87 s
+        Time/state: 53.1 microseconds/state
+
+    MAPF02C 3 agents. 
+        Total states: 49*48*47 = 110,544 (110,541 generated)
+        similar to MAPF02
+
+    MAPF03 4 agents. 
+        Total states: 49*48*47*46 = 5,085,024 (5,063,873 generated)
+        Time: 2388.503 s
+        Time/state: 471.7 microseconds/state
+
+    MAPF03C 4 agents. 
+        Total states: 49*48*47*46 = 5,085,024 (5,084,159 generated)
+        Time: 1700.104 s
+        Time/state: 334.4 microseconds/state
+
+
+Note: The time complexity scales with the number of agents for the methods 
+    `State::constructor(State parent, Action[] jointAction)`    
+        scales linear with #agents
+        loops over agents
+
+    `State::isConflicting`
+        scales linear with #agents
+        loops over agents
+    
+    `State::agentAt`
+        scales linear with #agents
+        loop over agents
+
+    `State::cellIsFree`
+        scales linear with #agents
+        calls `State:agentAt`
+    
+    `State::isApplicable`
+        scales linear with #agents
+        calls State::cellIsFree
+
+    `State::getExpandedStates` 
+        scales at least as #agents^2 i.e. Omega(#agents^2)
+        loop over agents calling `State::isApplicable`
+        
+        but also goes through all permutations of applicable actions for all agents 
+        evaluating if they are conflicting and calling the private `State::constructor`, both scaling linear.
+
+        #permutations: product of applicable actions over all agents, where each iteration uses linear time over agents.
+        Time: O(#agents * #permutations)
+        
+    Each iteration of graph search, calls: 
+        `State::isGoalState`: O(size of map)
+        `State::getExpandedStates`: Omega(#agents^2)
+
+    This explains why we see a larger timer/state evaluation for the maps with more agents.
+
+################################ 
+
+Exercise 3 (Depth-First Search for Multi-Agent Pathfinding)
+
+    1a. Modify the implementation so that it supports depth-first search (DFS).
+       Benchmark your DFS client on the MAPF00.lvl, MAPF01.lvl, MAPF02.lvl, MAPF02C.lvl, MAPF03.lvl, MAPF03C.lvl, MAPFslidingpuzzle.lvl and MAPFreorder2.lvl levels and report your benchmarks. Does DFS find solutions faster or slower than BFS and why? 
+       
+Solution:
+    Show example video of a DFS solution and show benchmarks. DFS explores the depth of the search tree, and backtracks if it does not find a valid solution. Not many dead ends in these levels, meaning DFS has good opportunities to find a solution.
+______________________________
+
+    1b. And how about the length of the solutions found? 
+
+Solution:
+    By exploring the depth, and not exhausting the highest layers of the search tree, DFS is not guaranteed to find optimal solutions. This is seen in the solution lengths which are much larger than the BFS solutions.
+______________________________
+
+    1c. Also briefly explain how your implementation of DFS differs from the implementation of BFS.
+
+Solution:
+    Order frontier using a stack (FILO) instead of a queue (FIFO), such that the newest entry to the frontier is explored next compared to the oldest entry.
+______________________________
+

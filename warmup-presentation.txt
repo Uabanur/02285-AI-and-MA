@@ -136,3 +136,17 @@ Solution:
     Order frontier using a stack (FILO) instead of a queue (FIFO), such that the newest entry to the frontier is explored next compared to the oldest entry.
 ______________________________
 
+    2. Design a level BFSfriendly.lvl on which your BFS client finds a solution spending significantly less time than the DFS client. Why does BFS perform better than DFS on this level?
+
+Solution:
+    Show the BFSfriendly level, and explain why BFS finds a solution faster than DFS.
+    - The solution is neat the start state, but the map has a large area which DFS wastes a lot of time and memory, if it does not by coincedence choose to investigate the goal state. 
+    - BFS is forced to explore near nodes first, and thereby is guaranteed to find the goal state.
+    
+    Another way to say it:
+    - DFS explores the lower levels of the search-tree, which are all invalid states before backtracking up to the first levels again, where BFS starts by searching the first levels of the search-tree where the goal is.
+    - Key factors of a BFSfriendly map: 
+        1. Low probability of DFS finding the goal early by increasing the branching factor
+        2. Large state space to keep DFS occupied before returning to the first levels of the tree.
+
+

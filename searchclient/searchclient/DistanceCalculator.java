@@ -31,42 +31,40 @@ public class DistanceCalculator {
             int row = current.row;
             int col = current.col;
             Position top = new Position(row-1,col);
-            if (row > 0 && !visited.contains(top)) {
+            if (row > 0 && !visited.contains(top) && !State.walls[top.row][top.col]) {
                 visited.add(top);
                 int weight = getWeightPosition(top, s);
-                if (!State.walls[top.row][top.col]) neighbors.add(top);
                 distanceTo.put(top,distanceTo.get(current)+weight);
+                neighbors.add(top);
             }
             Position left = new Position(row,col-1);
-            if (col > 0 && !visited.contains(left)) {
+            if (col > 0 && !visited.contains(left) && !State.walls[left.row][left.col]) {
                 visited.add(left);
                 int weight = getWeightPosition(left, s);
-                if (!State.walls[left.row][left.col]) neighbors.add(left);
                 distanceTo.put(left,distanceTo.get(current)+weight);
+                neighbors.add(left);
             }
             Position bot = new Position(row+1,col);
-            if (row < State.walls.length - 1 && !visited.contains(bot)) {
+            if (row < State.walls.length - 1 && !visited.contains(bot) && !State.walls[bot.row][bot.col]) {
                 visited.add(bot);
                 int weight = getWeightPosition(bot, s);
-                if (!State.walls[bot.row][bot.col]) neighbors.add(bot);
                 distanceTo.put(bot,distanceTo.get(current)+weight);
+                neighbors.add(bot);
             }
             Position right = new Position(row,col+1);
-            if (col < State.walls[row].length - 1 && !visited.contains(right)) {
+            if (col < State.walls[row].length - 1 && !visited.contains(right) && !State.walls[right.row][right.col]) {
                 visited.add(right);
                 int weight = getWeightPosition(right, s);
-                if (!State.walls[right.row][right.col]) neighbors.add(right);
                 distanceTo.put(right,distanceTo.get(current)+weight);
+                neighbors.add(right);
             }
         }
         return 9999;
     }
 
     private static int getWeightPosition(Position pos, State s) {
-        final int WALL_WEIGHT = 9999;
         final int BOX_WEIGHT = 5;
-        if (State.walls[pos.row][pos.col]) return WALL_WEIGHT;
-        else if (s.boxes[pos.row][pos.col]!=0) return BOX_WEIGHT;
+        if (s.boxes[pos.row][pos.col]!=0) return BOX_WEIGHT;
         return 1;
     }
 }

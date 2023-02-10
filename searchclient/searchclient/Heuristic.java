@@ -67,10 +67,10 @@ public abstract class Heuristic
                 if (s.boxes[goalPos.row][goalPos.col] != box) unfinished++;
             }
         }
-        //if boxes are in their goals, take agents to theirs
-        if (boxGoals.isEmpty()) {
-            return agentGoalCountHeuristic(s);
-        }
+        //focus on moving all boxes to their goals (with this penalty)
+        if (unfinished > 0) unfinished += agentGoals.size();
+        //then the only remaining goals will be agent goals
+        unfinished += agentGoalCountHeuristic(s);
         return unfinished;
     }
 
@@ -86,6 +86,18 @@ public abstract class Heuristic
         return totalDistance;
     }
 
+    private int agentShortestPathDistance(State s) {
+        int totalDistance = 0;
+        for (AgentPosition agent : agentGoals){
+            char symbol = agent.symbol;
+            Position goalPos = new Position(agent.row, agent.col);
+            int row = s.agentRows[symbol - '0'];
+            int col = s.agentCols[symbol - '0'];
+            totalDistance += DistanceCalculator.shortestPathDistance(new Position(row, col), goalPos, s);
+        }
+        return totalDistance;
+    }
+
     private int totalDistBoxGoals(State s) {
         var totalDistance = 0;
         ArrayList<Position> boxPositions = new ArrayList<>();
@@ -97,8 +109,6 @@ public abstract class Heuristic
                 Position boxPos = new Position(row,col);
                 boxPositions.add(boxPos);
                 totalDistance += DistanceCalculator.shortestPathDistanceToGoals(boxPos, goals, s);
-                //totalDistance += DistanceCalculator.manhattenDistance(boxPos, goal);
-                //totalDistance += DistanceCalculator.manhattenDistance(agent0, boxPos)*0.5;
             }
         }
         Position agent0 = new Position(s.agentRows[0],s.agentCols[0]);
@@ -108,10 +118,12 @@ public abstract class Heuristic
 
     public int pushPullHeuristic(State s) {
         int h = totalDistBoxGoals(s);
-        //if boxes are in their goals, take agents to theirs
-        if (h == 0) {
-            return agentSmallestManhattenDistanceHeuristic(s);
-        }
+        int unfinishedBoxes = boxGoalCountHeuristic(s);
+        h += unfinishedBoxes*1;    // divide by boxGoals.size()*10?
+        h += agentShortestPathDistance(s);  //bring agent back to goal
+        //but only after finishing with box goals
+        if (unfinishedBoxes > 0) h += State.walls.length * State.walls[0].length;
+
         return h;
     }
 

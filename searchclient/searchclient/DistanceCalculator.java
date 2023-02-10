@@ -17,8 +17,7 @@ public class DistanceCalculator {
     }
 
     public static int shortestPathDistanceToGoals(Position from, ArrayList<Position> goals, State s) {
-        final int WALL_WEIGHT = 9999;
-        final int BOX_WEIGHT = 5; //could be influenced by map size (to account for time to move box out of blocked place)
+        if(goals.contains(from)) return 0;       
         HashMap<Position,Integer> distanceTo = new HashMap<>();
         LinkedList<Position> neighbors = new LinkedList<>();
         HashSet<Position> visited = new HashSet<>();
@@ -63,7 +62,7 @@ public class DistanceCalculator {
     }
 
     private static int getWeightPosition(Position pos, State s) {
-        final int BOX_WEIGHT = 5;
+        final int BOX_WEIGHT = 5; //could be influenced by map size (to account for time to move box out of blocked place)
         if (s.boxes[pos.row][pos.col]!=0) return BOX_WEIGHT;
         return 1;
     }

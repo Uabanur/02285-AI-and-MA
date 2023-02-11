@@ -104,6 +104,47 @@ public class State
                     this.agentRows[agent] += action.agentRowDelta;
                     this.agentCols[agent] += action.agentColDelta;
                     break;
+
+                case Push:
+                    this.agentRows[agent] += action.agentRowDelta;
+                    this.agentCols[agent] += action.agentColDelta;
+
+                    // The original location of the box is the agent's updated location
+                    int boxRow = this.agentRows[agent];
+                    int boxCol = this.agentCols[agent];
+
+                    // Remove the box from its original place, and store it
+                    assert boxAt(boxRow, boxCol);
+                    box = this.boxes[boxRow][boxCol];
+                    this.boxes[boxRow][boxCol] = 0;
+
+                    // Place the stored box into its updated location
+                    boxRow += action.boxRowDelta;
+                    boxCol += action.boxColDelta;
+                    this.boxes[boxRow][boxCol] = box;
+
+                    break;
+
+                case Pull:
+                    
+                    // The original location of the box is the agent's original location minus the movement direction of the box
+                    boxRow = this.agentRows[agent] - action.boxRowDelta;
+                    boxCol = this.agentCols[agent] - action.boxColDelta;
+
+                    this.agentRows[agent] += action.agentRowDelta;
+                    this.agentCols[agent] += action.agentColDelta;
+
+                    // Remove the box from boxes array and store it
+                    assert boxAt(boxRow, boxCol);
+                    box = this.boxes[boxRow][boxCol];
+                    this.boxes[boxRow][boxCol] = 0;
+
+                    // Place the stored box into its updated location
+                    boxRow += action.boxRowDelta;
+                    boxCol += action.boxColDelta;
+                    this.boxes[boxRow][boxCol] = box;
+
+                    break;
             }
         }
     }
@@ -207,18 +248,75 @@ public class State
         Color agentColor = this.agentColors[agent];
         int boxRow;
         int boxCol;
-        char box;
-        int destinationRow;
-        int destinationCol;
+        char boxSymbol;
+        int agentDestinationRow;
+        int agentDestinationCol;
+        int boxDestinationRow;
+        int boxDestinationCol;
         switch (action.type)
         {
             case NoOp:
                 return true;
 
             case Move:
-                destinationRow = agentRow + action.agentRowDelta;
-                destinationCol = agentCol + action.agentColDelta;
-                return this.cellIsFree(destinationRow, destinationCol);
+                agentDestinationRow = agentRow + action.agentRowDelta;
+                agentDestinationCol = agentCol + action.agentColDelta;
+                return this.cellIsFree(agentDestinationRow, agentDestinationCol);
+
+            case Push:
+                agentDestinationRow = agentRow + action.agentRowDelta;
+                agentDestinationCol = agentCol + action.agentColDelta;
+
+                // The original location of the box is the agent's destination location
+                boxRow = agentDestinationRow;
+                boxCol = agentDestinationCol;
+                boxSymbol = this.boxes[boxRow][boxCol];
+
+                // Box exists at its expected location
+                if (!boxAt(boxRow, boxCol)) {
+                    return false;
+                }
+
+                // Box is of the same color as the agent
+                if (this.getBoxColor(boxSymbol) != agentColor) {
+                    return false;
+                }
+
+                // Box can be moved to its destination location
+                boxDestinationRow = boxRow + action.boxRowDelta;
+                boxDestinationCol = boxCol + action.boxColDelta;
+                if (!this.cellIsFree(boxDestinationRow, boxDestinationCol))
+                {
+                    return false;
+                }
+
+                return true;
+
+            case Pull:
+                // The original location of the box is agent's original location minus the movement direction of the box
+                boxRow = agentRow - action.boxRowDelta;
+                boxCol = agentCol - action.boxColDelta;
+                boxSymbol = this.boxes[boxRow][boxCol];
+
+                // Box exists at its expected location
+                if (!boxAt(boxRow, boxCol)) {
+                    return false;
+                }
+
+                // Box is of the same color as the agent
+                if (this.getBoxColor(boxSymbol) != agentColor) {
+                    return false;
+                }
+
+                // Agent can move to it its destination location
+                agentDestinationRow = agentRow + action.agentRowDelta;
+                agentDestinationCol = agentCol + action.agentColDelta;
+                if (!this.cellIsFree(agentDestinationRow, agentDestinationCol))
+                {
+                    return false;
+                }
+
+                return true;
 
         }
 
@@ -298,6 +396,14 @@ public class State
             }
         }
         return 0;
+    }
+
+    private boolean boxAt(int row, int col) {
+        return this.boxes[row][col] >= 'A' && this.boxes[row][col] <= 'Z';
+    }
+
+    private Color getBoxColor(char boxSymbol) {
+        return this.boxColors[boxSymbol - 'A'];
     }
 
     public Action[][] extractPlan()

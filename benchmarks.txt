@@ -46,3 +46,20 @@ MAPF03C             |   Greedy  |  Goal Count   |           78,820      |     0.
 MAPFslidingpuzzle   |   Greedy  |  Goal Count   |              962      |     0.032 |           46      |
 MAPFreorder2        |   Greedy  |  Goal Count   |          386,573      |     8.956 |          428      |
 BFSfriendly         |   Greedy  |  Goal Count   |               24      |     0.005 |            1      |
+
+
+# Push and Pull levels
+
+Level               |   Strategy    |    States Generated   |  Time/s   |   Solution length
+--------------------------------------------------------------------------------------------
+SAFirefly           |     BFS       |        1.983.936      |     9.103 |           60      |
+SACrunch            |     BFS       |        9.282.526      |    35.916 |           98      |
+
+SAFirefly           |     DFS       |        1.365.367      |     4.196 |       870859      |
+SACrunch            |     DFS       |        7.488.709      |    21.782 |      1079822      |
+
+SAFirefly           |     A*        |        1.927.060      |     8,936 |           60      |
+SACrunch            |     A*        |        9.245.346      |    37,823 |           98      |
+
+SAFirefly           |    Greedy     |        4.747.877      |    15,170 |      1618154      |
+SACrunch            |    Greedy     |        5.615.001      |    14,801 |       855934      |

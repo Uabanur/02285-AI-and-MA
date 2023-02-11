@@ -149,6 +149,26 @@ Solution:
         1. Low probability of DFS finding the goal early by increasing the branching factor
         2. Large state space to keep DFS occupied before returning to the first levels of the tree.
 
+
+################################ 
+
+Exercise 4 (Informed Search and Heuristics)
+
+    1. We implemented this using a Priority Queue. We made benchmarks and we can see that A* behaves as BFS -- you can also see a video.
+    2. We then implemented Goal Count heuristic: This heuristic keep tracks of how many agents still have to reach the goal, and using informed search, the algorithm will try to minimise this value. The benchmarks of using this heuristic function can be seen in the Table. To test our implementation, we used our IOWrapper to log the state, as well as the heuristic evaluation of this state. This information was useful, but also this kind of testing soon proved to be cumbersome, therefore in order to make the code more testable, we extracted part of the implementation to follow a factory design pattern, and wrote unit tests to test our more ambitious heuristic functions. 
+    3. And speaking of a more ambitious heuristic function, we designed our new, hopefully improved and more informed heuristic function as follows: The idea is to measure the Manhattan distance to the goal, from the position of the agent... + formula or pseudo-code.
+    4. Finally, in this Table you see the performance of both the A* and the greedy best-first search. We can see that A* performs very similarly BFS, while the greedy algorithm clearly outperforms every other algorithm.
+
+
+################################ 
+
+Exercise 5 (Adding support for pushing and pulling boxes)
+    
+    1. To support the actions of pushing and pulling a box, we further modified the code: We included these actions. 
+    2. We further ran graph-search on the selected levels SAD1, SAD2 and SAD3, which necesitate pushing and pulling boxes. Here you can see the benchmarks of the performance of the BFS and DFS algorithms. We can see that BFS always finds the optimal solution, whereas DFS finds a solution of much larger length. However, the DFS algorithms finds this solution much much faster. This is because by introducing new actions: from 5 actions to 29, the branching factor has risen significantly, and the BFS algorithm spends its time exploring states all the possibilities near the initial state, uselessly wandering around the start, exploring everything that's possible not-too-far from the initial state in terms of actions. The eventual action that solves the level is far away from the initial position of the agent, and by being "distance oriented", the DFS algorithm "stumbles upon" this action much faster.
+    3. We also benchmarked the last two levels: SAFirefly and SACrunch, and you see the result on this table.
+
+
 #########################################
 
 Excercise 6 - Box Push/Pull heuristic

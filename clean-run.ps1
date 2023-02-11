@@ -1,9 +1,19 @@
 
-$SearchStrategy = "-dfs"
-$ShowGUI = $false;
+$SearchStrategy = "-greedy"
+$ShowGUI = $true;
 
 $Levels = @(
-    'BFSFriendly'
+    'SAFirefly'
+    , 'SACrunch'
+    , 'SAsoko3Mix2_08'
+    #, 'SAsokobanLevel96'
+    , 'SAsolo'
+    #, 'SAsorting'
+    , 'SATheRedDot'
+    , 'SAtowersOfHoChiMinh03'
+    , 'SAtowersOfSaigon03'
+    , 'SAWatsOn'
+    # 'BFSFriendly'
     #  'MAPF00'
     #, 'MAPF01'
     # , 'MAPF02'
@@ -28,7 +38,7 @@ try
     foreach($level in $Levels){
         echo "`n`n`t## Level: $level ##`n"
         if ($ShowGUI){
-            java -jar mavis.jar -l "levels/$level.lvl" -c "java searchclient.SearchClient $SearchStrategy" -g
+            java -jar mavis.jar -l "levels/$level.lvl" -c "java searchclient.SearchClient $SearchStrategy" -g -s 75
         } else {
             java -jar mavis.jar -l "levels/$level.lvl" -c "java searchclient.SearchClient $SearchStrategy"
         }

@@ -1,6 +1,8 @@
 package searchclient;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
@@ -9,23 +11,37 @@ public abstract class Heuristic
 {
 
     public ArrayList<AgentPosition> agentGoals = new ArrayList<>();
+    public HashMap<Character,ArrayList<Position>> boxGoals = new HashMap<>();
     public Heuristic(State initialState)
     {
         // Here's a chance to pre-process the static parts of the level.
         for (int row = 0; row < State.goals.length; row++) {
             for (int col = 0; col < State.goals[row].length; col++) {
                 var goal = State.goals[row][col];
+                if (goal >= 'A' && goal <= 'Z') {
+                    if(!boxGoals.containsKey(goal)) {
+                        ArrayList<Position> positions = new ArrayList<>();
+                        positions.add(new Position(row, col));
+                        boxGoals.put(goal, positions);
+                    }
+                    else {
+                        boxGoals.get(goal).add(new Position(row, col));
+                    }
+                }
                 if (goal < '0' || '9' < goal) continue;
                 agentGoals.add(new AgentPosition(goal, row, col));
             }
         }
         IO.debug("Found agent goals: " + agentGoals.toString());
+        IO.debug("Found box goals: "+boxGoals.toString());
     }
 
     public int h(State s)
     {
         // return agentGoalCountHeuristic(s);
-        return agentSmallestManhattenDistanceHeuristic(s);
+        // return agentSmallestManhattenDistanceHeuristic(s);
+        //return boxGoalCountHeuristic(s);
+        return pushPullHeuristic(s);
     }
 
     public int agentGoalCountHeuristic(State s) {
@@ -43,6 +59,21 @@ public abstract class Heuristic
         return unfinished;
     }
 
+    public int boxGoalCountHeuristic(State s) {
+        int unfinished = 0;
+        for (Map.Entry<Character, ArrayList<Position>> goal : boxGoals.entrySet()) {
+            char box = goal.getKey();
+            for (Position goalPos : goal.getValue()) {
+                if (s.boxes[goalPos.row][goalPos.col] != box) unfinished++;
+            }
+        }
+        //focus on moving all boxes to their goals (with this penalty)
+        if (unfinished > 0) unfinished += agentGoals.size();
+        //then the only remaining goals will be agent goals
+        unfinished += agentGoalCountHeuristic(s);
+        return unfinished;
+    }
+
     public int agentSmallestManhattenDistanceHeuristic(State s) {
         var totalDistance = 0;
         for (var agent : agentGoals){
@@ -53,6 +84,47 @@ public abstract class Heuristic
         }
 
         return totalDistance;
+    }
+
+    private int agentShortestPathDistance(State s) {
+        int totalDistance = 0;
+        for (AgentPosition agent : agentGoals){
+            char symbol = agent.symbol;
+            Position goalPos = new Position(agent.row, agent.col);
+            int row = s.agentRows[symbol - '0'];
+            int col = s.agentCols[symbol - '0'];
+            totalDistance += DistanceCalculator.shortestPathDistance(new Position(row, col), goalPos, s);
+        }
+        return totalDistance;
+    }
+
+    private int totalDistBoxGoals(State s) {
+        var totalDistance = 0;
+        ArrayList<Position> boxPositions = new ArrayList<>();
+        for (int row = 0; row < s.boxes.length - 1; row++) {
+            for (int col = 0; col < s.boxes[row].length - 1; col++){
+                char box = s.boxes[row][col];
+                if (box == 0) continue;
+                ArrayList<Position> goals = boxGoals.get(box);
+                Position boxPos = new Position(row,col);
+                boxPositions.add(boxPos);
+                totalDistance += DistanceCalculator.shortestPathDistanceToGoals(boxPos, goals, s);
+            }
+        }
+        Position agent0 = new Position(s.agentRows[0],s.agentCols[0]);
+        totalDistance += DistanceCalculator.shortestPathDistanceToGoals(agent0, boxPositions, s);
+        return totalDistance;
+    }
+
+    public int pushPullHeuristic(State s) {
+        int h = totalDistBoxGoals(s);
+        int unfinishedBoxes = boxGoalCountHeuristic(s);
+        h += unfinishedBoxes*1;    // divide by boxGoals.size()*10?
+        h += agentShortestPathDistance(s);  //bring agent back to goal
+        //but only after finishing with box goals
+        if (unfinishedBoxes > 0) h += State.walls.length * State.walls[0].length;
+
+        return h;
     }
 
     public int nearestManhattenDistanceAgentGoal(char agentSymbol, Position agentPosition) {

@@ -14,9 +14,9 @@ public enum Action
         List of possible actions. Each action has the following parameters, 
         taken in order from left to right:
         1. The name of the action as a string. This is the string sent to the server
-        when the action is executed. Note that for Push and Push actions the syntax is
-        "Push(X,Y)" and "Push(X,Y)" with no spaces.
-        2. Action type: NoOp, Move, Push or Push (only NoOp and Move initially supported)
+        when the action is executed. Note that for Push and Pull actions the syntax is
+        "Push(X,Y)" and "Pull(X,Y)" with no spaces.
+        2. Action type: NoOp, Move, Push or Pull (only NoOp and Move initially supported)
         3. agentRowDelta: the vertical displacement of the agent (-1,0,+1)
         4. agentColDelta: the horisontal displacement of the agent (-1,0,+1)
         5. boxRowDelta: the vertical displacement of the box (-1,0,+1)

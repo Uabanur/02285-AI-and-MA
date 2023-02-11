@@ -149,4 +149,16 @@ Solution:
         1. Low probability of DFS finding the goal early by increasing the branching factor
         2. Large state space to keep DFS occupied before returning to the first levels of the tree.
 
+#########################################
 
+Excercise 6 - Box Push/Pull heuristic
+
+1. Goal count heuristic and benchmark vs BFS and DFS in 2 levels.
+    - We can see that the Goal count heuristic is extremely fast, but it gives bad solutions, instead BFS and DFS take a long time to find a solution but theirs are more optimal
+
+2. Custom Heuristic:
+    - Talk about different versions 
+    - Compare bennchmarks
+    - Own levels
+    - Explain strengths and weaknesses of final version (and maybe some older ones)
+    - Future optimizations
